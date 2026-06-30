@@ -19,7 +19,12 @@ function getPool() {
       options: {
         encrypt: config.db.encrypt,
         trustServerCertificate: config.db.trustServerCertificate,
-        ...(tlsServerName ? { serverName: tlsServerName } : {})
+        ...(tlsServerName
+          ? {
+              serverName: tlsServerName,
+              servername: tlsServerName
+            }
+          : {})
       },
       pool: {
         max: config.db.poolMax,
