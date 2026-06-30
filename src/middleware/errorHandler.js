@@ -12,7 +12,11 @@ function errorHandler() {
       return next(err);
     }
 
-    res.status(500).json({ success: false, message: "Internal server error." });
+    res.status(500).json({
+      success: false,
+      message: "Internal server error.",
+      requestId
+    });
   };
 }
 
