@@ -14,6 +14,13 @@ const getOptionalNumber = (key, fallback) => {
   return parsed;
 };
 
+const getOptionalString = (key) => {
+  const raw = process.env[key];
+  if (!raw) return undefined;
+  const value = String(raw).trim();
+  return value || undefined;
+};
+
 module.exports = {
   port: getOptionalNumber("PORT", 3000),
   jwt: {
@@ -33,6 +40,7 @@ module.exports = {
     trustServerCertificate:
       String(process.env.DB_TRUST_SERVER_CERTIFICATE || "false").toLowerCase() ===
       "true",
+    tlsServerName: getOptionalString("DB_TLS_SERVERNAME"),
     poolMax: getOptionalNumber("DB_POOL_MAX", 10),
     poolMin: getOptionalNumber("DB_POOL_MIN", 0),
     poolIdleTimeoutMillis: getOptionalNumber("DB_POOL_IDLE_TIMEOUT_MS", 30000)
