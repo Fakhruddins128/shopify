@@ -3,7 +3,7 @@ const requireEnv = (key) => {
   if (!value) {
     throw new Error(`Missing required environment variable: ${key}`);
   }
-  return value;
+  return String(value).trim();
 };
 
 const getOptionalNumber = (key, fallback) => {
