@@ -157,51 +157,49 @@ router.post("/item-stock", authJwt(), async (req, res, next) => {
   }
 });
 
-router.get("/zero-stock", authJwt(), async (req, res, next) => {
+const zeroStockHandler = async (req, res, next) => {
   try {
     const pool = await getPool();
 
-    const stockResult = await pool
-      .request()
-      .query(
-        `
-        SELECT
-          S.StoreCode AS BranchCode,
-          S.ID AS StoreId,
-          C2.Description AS Category,
-          VD.OldCode,
-          (IM.ItemCode + '-' + M.M_Code + '-' + C.Code + '-' + F.Code) AS ItemCode,
-          IM.ProductName,
-          M.ProductName AS Material,
-          C.Color,
-          F.Finish,
-          SUM(SD.Stock) AS Stock
-        FROM StoreDetail SD
-        INNER JOIN Store S ON SD.FK_Store = S.ID
-                      AND S.Active = 1
-        INNER JOIN FinishProductVariantDetail VD ON SD.FK_Variant = VD.ID
-        INNER JOIN ItemMaster IM ON VD.FK_ItemMasterID = IM.ID
-        INNER JOIN Category3 C3 ON IM.FKSubGroupID = C3.ID
-        INNER JOIN Category2 C2 ON C3.FK_Category2ID = C2.ID
-        INNER JOIN FP_MaterialMaster M ON VD.FKMaterialID = M.ID
-        INNER JOIN FP_ColorMaster C ON VD.FKColourID = C.ID
-        INNER JOIN Finish F ON VD.FKFinishID = F.ID
-        GROUP BY
-          S.StoreCode,
-          S.ID,
-          C2.Description,
-          VD.OldCode,
-          (IM.ItemCode + '-' + M.M_Code + '-' + C.Code + '-' + F.Code),
-          IM.ProductName,
-          M.ProductName,
-          C.Color,
-          F.Finish
-        HAVING SUM(SD.Stock) = 0
-        ORDER BY
-          BranchCode,
-          ItemCode
-        `
-      );
+    const stockResult = await pool.request().query(
+      `
+      SELECT
+        S.StoreCode AS BranchCode,
+        S.ID AS StoreId,
+        C2.Description AS Category,
+        VD.OldCode,
+        (IM.ItemCode + '-' + M.M_Code + '-' + C.Code + '-' + F.Code) AS ItemCode,
+        IM.ProductName,
+        M.ProductName AS Material,
+        C.Color,
+        F.Finish,
+        SUM(SD.Stock) AS Stock
+      FROM StoreDetail SD
+      INNER JOIN Store S ON SD.FK_Store = S.ID
+                    AND S.Active = 1
+      INNER JOIN FinishProductVariantDetail VD ON SD.FK_Variant = VD.ID
+      INNER JOIN ItemMaster IM ON VD.FK_ItemMasterID = IM.ID
+      INNER JOIN Category3 C3 ON IM.FKSubGroupID = C3.ID
+      INNER JOIN Category2 C2 ON C3.FK_Category2ID = C2.ID
+      INNER JOIN FP_MaterialMaster M ON VD.FKMaterialID = M.ID
+      INNER JOIN FP_ColorMaster C ON VD.FKColourID = C.ID
+      INNER JOIN Finish F ON VD.FKFinishID = F.ID
+      GROUP BY
+        S.StoreCode,
+        S.ID,
+        C2.Description,
+        VD.OldCode,
+        (IM.ItemCode + '-' + M.M_Code + '-' + C.Code + '-' + F.Code),
+        IM.ProductName,
+        M.ProductName,
+        C.Color,
+        F.Finish
+      HAVING SUM(SD.Stock) = 0
+      ORDER BY
+        BranchCode,
+        ItemCode
+      `
+    );
 
     return res.status(200).json({
       success: true,
@@ -211,6 +209,9 @@ router.get("/zero-stock", authJwt(), async (req, res, next) => {
   } catch (err) {
     return next(err);
   }
-});
+};
+
+router.get("/zero-stock", authJwt(), zeroStockHandler);
+router.post("/zero-stock", authJwt(), zeroStockHandler);
 
 module.exports = router;
